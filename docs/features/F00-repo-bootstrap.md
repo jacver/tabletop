@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F00-repo-bootstrap`
 - **Sessions:** `[F00] repo-bootstrap · build`, `· review`
-- **Status:** Draft, awaiting approval
+- **Status:** Built, in review
 
 ## Goal
 
@@ -88,4 +88,16 @@ Command checks (run by hand in review, by CI from F01):
 
 ## Follow-ups
 
-- (add anything found during build that is out of scope)
+- **pnpm release-age policy.** pnpm 12 refuses packages published in the last
+  24 hours, so `@playwright/test` is 1.65.0 and `jsdom` 31.0.0 (the newest
+  versions old enough). Bump them in a later branch.
+- **Playwright browsers in CI (F01).** Run `pnpm exec playwright install
+  --with-deps chromium` before `pnpm e2e` and `pnpm e2e:spa`.
+- **Cloud sessions.** The Playwright browser CDN isn't reachable from Claude
+  cloud sessions. The build session ran e2e with the container's pre-installed
+  Chromium through a throwaway config override (not committed). Consider
+  allowing the CDN host in the `tabletop` cloud environment.
+- **`src/env.ts` on Workers (F03).** It reads `process.env` when present. On
+  Cloudflare Workers, bindings arrive per request; revisit when deploying.
+- **Generated route tree is committed** (`src/routeTree.gen.ts`) so
+  `pnpm typecheck` works on a clean clone without a build first.
