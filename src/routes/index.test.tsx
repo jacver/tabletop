@@ -1,7 +1,8 @@
+import { createMemoryHistory, createRouter } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { APP_NAME } from "@/config/app";
-import { Route as RootRoute } from "./__root";
+import { routeTree } from "@/routeTree.gen";
 import { Route as IndexRoute } from "./index";
 
 function renderHome() {
@@ -19,13 +20,19 @@ describe("home route", () => {
 	});
 
 	it("document title includes APP_NAME", async () => {
-		const head = await RootRoute.options.head?.(
-			{} as Parameters<NonNullable<typeof RootRoute.options.head>>[0],
+		// Load "/" through the real route tree, so the title comes from the
+		// root route's head() exactly as the router resolves it.
+		const router = createRouter({
+			routeTree,
+			history: createMemoryHistory({ initialEntries: ["/"] }),
+		});
+		await router.load();
+		const titles = router.state.matches.flatMap((match) =>
+			(match.meta ?? []).flatMap((m) =>
+				m && typeof m.title === "string" ? [m.title] : [],
+			),
 		);
-		const titles = (head?.meta ?? []).flatMap((m) =>
-			m && "title" in m && typeof m.title === "string" ? [m.title] : [],
-		);
-		expect(titles.some((t) => t.includes(APP_NAME))).toBe(true);
+		expect(titles).toContain(APP_NAME);
 	});
 
 	it('home route renders a "Get started" button', () => {

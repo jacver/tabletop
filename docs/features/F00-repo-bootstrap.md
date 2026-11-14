@@ -97,7 +97,14 @@ Command checks (run by hand in review, by CI from F01):
   cloud sessions. The build session ran e2e with the container's pre-installed
   Chromium through a throwaway config override (not committed). Consider
   allowing the CDN host in the `tabletop` cloud environment.
-- **`src/env.ts` on Workers (F03).** It reads `process.env` when present. On
-  Cloudflare Workers, bindings arrive per request; revisit when deploying.
+- **`src/env.ts` on Workers (F03).** There is no parsed `env` singleton;
+  server code calls `parseEnv(source)` per request. F03 wires the Workers
+  binding (or `process.env` on a Node host) into that call.
 - **Generated route tree is committed** (`src/routeTree.gen.ts`) so
   `pnpm typecheck` works on a clean clone without a build first.
+- **Review fixes (build session).** `build:spa` uses `vite build --mode spa`
+  (works in Windows shells); e2e servers use ports 4310/4311 and never reuse a
+  running server; Node types are limited to configs and tests
+  (`tsconfig.node.json`), so app code can't type-check against Node globals;
+  CLAUDE.md rule 5 now exempts root `*.config.ts` tooling flags; new
+  `pnpm lint:fix` applies import sorting, which `pnpm format` doesn't.

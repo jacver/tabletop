@@ -29,8 +29,9 @@ pnpm dev                               # http://localhost:3000
 | `pnpm build` | Production build (SSR) into `dist/` |
 | `pnpm build:spa` | Client-only static build into `dist-spa/client/` |
 | `pnpm preview` | Serve the production build |
-| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm typecheck` | TypeScript check of app code, configs and tests |
 | `pnpm lint` | Biome lint + format check |
+| `pnpm lint:fix` | Biome lint + format, applying fixes (incl. import order) |
 | `pnpm format` | Biome format, writing changes |
 | `pnpm test` | Vitest unit tests |
 | `pnpm e2e` | Playwright against the production build |

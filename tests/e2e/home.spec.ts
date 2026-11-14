@@ -9,7 +9,7 @@ test("home page loads with status 200 and shows the app name", async ({
 	await expect(
 		page.getByRole("heading", { level: 1, name: APP_NAME }),
 	).toBeVisible();
-	await expect(page).toHaveTitle(new RegExp(APP_NAME));
+	await expect(page).toHaveTitle(APP_NAME);
 });
 
 test("tailwind styles are applied to the home heading", async ({ page }) => {

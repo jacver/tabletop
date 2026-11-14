@@ -43,8 +43,8 @@ names (e.g. "Ironvale Skirmish", "Brass Wardens") in examples and tests.
 | `pnpm dev` | Dev server |
 | `pnpm build` | Production build (SSR) |
 | `pnpm build:spa` | Client-only static build (used by mobile in Phase 5) |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm lint` / `pnpm format` | Biome check / Biome format --write |
+| `pnpm typecheck` | `tsc -b`: app code (web types only) + configs/tests (Node types) |
+| `pnpm lint` / `pnpm lint:fix` / `pnpm format` | Biome check / Biome check --write (incl. import order) / Biome format --write |
 | `pnpm test` | Vitest (unit + integration) |
 | `pnpm e2e` | Playwright |
 | `pnpm db:up` / `pnpm db:migrate` / `pnpm db:seed` | Local Postgres (from F02) |
@@ -79,7 +79,9 @@ docs/features/       one spec per feature ID
    business logic in SSR-only code; loaders call server functions.
 4. **Web-standard APIs on the server.** fetch, Request/Response, Web Crypto.
    No Node-only modules (`fs`, `crypto` from node, etc.) outside build scripts.
-5. **Env via `src/env.ts` only.** Zod-validated; never `process.env` elsewhere.
+5. **Env via `src/env.ts` only.** Zod-validated; never `process.env` elsewhere
+   in app code. Tool config files at the repo root (`*.config.ts`) may read
+   tooling flags such as `CI` directly.
 6. **Migrations are forward-only.** Never edit a merged migration.
 7. **Limits live in the database where possible** (e.g. unique
    `(figurine_id, slot)` for the 2-photo limit), and are also checked in code.

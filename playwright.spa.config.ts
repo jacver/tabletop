@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 // Serves the client-only `build:spa` output from a plain static server, to
 // prove it runs without the app server (as the mobile shell will in Phase 5).
-const PORT = 4174;
+const PORT = 4311;
 
 export default defineConfig({
 	testDir: "tests/e2e",
@@ -18,7 +18,9 @@ export default defineConfig({
 	webServer: {
 		command: `pnpm build:spa && sirv dist-spa/client --single --port ${PORT}`,
 		url: `http://localhost:${PORT}`,
-		reuseExistingServer: !process.env.CI,
+		// Never attach to a server that's already running: it could be serving a
+		// stale or different build, and the tests would silently check that.
+		reuseExistingServer: false,
 		timeout: 180_000,
 	},
 });
