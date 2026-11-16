@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F01-ci-pipeline`
 - **Sessions:** `[F01] ci-pipeline · plan`, `· build`, `· review`
-- **Status:** Planned, awaiting approval
+- **Status:** Approved 2026-11-16, in build
 
 ## Goal
 
