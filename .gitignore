@@ -1,0 +1,21 @@
+node_modules
+.DS_Store
+dist
+dist-spa
+dist-ssr
+*.local
+.env
+.env.*
+!.env.example
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+__unconfig*
+
+# Playwright
+test-results
+playwright-report
+blob-report
+playwright/.cache
