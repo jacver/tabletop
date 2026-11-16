@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F01-ci-pipeline`
 - **Sessions:** `[F01] ci-pipeline · plan`, `· build`, `· review`
-- **Status:** Approved 2026-11-16, in build
+- **Status:** Built 2026-11-16, in review (PR #2)
 
 ## Goal
 
@@ -279,4 +279,12 @@ shows in the picker,
 - **Action update bot** (Dependabot or Renovate) for the pinned SHAs.
 - **Cloud sessions can't read `docs.github.com`, `playwright.dev`, `pnpm.io`**,
   or download Playwright browsers. Consider allowing those hosts in the
-  `tabletop` cloud environment.
+  `tabletop` cloud environment. The build session also couldn't download a
+  run's artifact zip (the Actions artifact storage host is refused), so the
+  `playwright-report/index.html` check relied on the upload step's log.
+- **First run's environment risk didn't materialise.** CI's first run passed
+  both e2e suites on the lockfile's Chromium (Chrome for Testing 158) with no
+  config changes. A green run's job takes about 1.5 minutes (billed as 2,
+  since jobs round up to the minute), so roughly 1,000 runs a month fit in the
+  Free plan's ~2,000 included minutes; the duplicate-builds follow-up is not
+  urgent.
