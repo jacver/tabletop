@@ -17,5 +17,6 @@ __unconfig*
 # Playwright
 test-results
 playwright-report
+playwright-report-spa
 blob-report
 playwright/.cache
