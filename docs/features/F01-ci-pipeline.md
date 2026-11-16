@@ -14,8 +14,10 @@ steps or jobs to this one workflow instead of inventing their own.
 
 1. **One workflow**, `.github/workflows/ci.yml`, named `CI`, triggered on
    `pull_request` (any base branch) and on `push` to `main`. One job, id and
-   name `ci`. That job name is the required status check; do not rename it
-   without updating branch protection.
+   name `ci`. The repo is private on GitHub Free, so `ci` is **advisory**
+   (GitHub can't enforce it; see Decision). Keep the job name stable anyway:
+   it is what the merge rule below checks, and what protection would require
+   if the plan ever changes.
 2. **Steps, in this order, in the one job** (sequential steps are cheaper than
    several jobs that each install):
    1. `actions/checkout` with `persist-credentials: false`
@@ -65,8 +67,10 @@ steps or jobs to this one workflow instead of inventing their own.
    Playwright's `--with-deps` targets doesn't move under us),
    `timeout-minutes: 20` on the job.
 10. **README:** a short "CI" section: the workflow runs the same commands as
-    the Commands table on every PR and push to `main`; the required check is
-    `ci`; a failed e2e run uploads the `playwright-report` artifact (download
+    the Commands table on every PR and push to `main`; the check is `ci` and
+    it is advisory (not enforced on this plan), so **never merge a PR unless
+    `ci` is green on its latest commit and the branch is up to date with
+    `main`**; a failed e2e run uploads the `playwright-report` artifact (download
     it from the run's Summary page and open `index.html`); installs use
     `--frozen-lockfile`, and pnpm 12 refuses versions published less than
     24 hours ago (`minimumReleaseAge`, default 1440 minutes), so a lockfile
@@ -121,11 +125,15 @@ read from their source repos (`github/docs`, `microsoft/playwright`,
 | Rulesets | Same split: public repos on Free; public and private on Pro, Team, Enterprise Cloud. | `github/docs` `data/reusables/gated-features/repo-rules.md` |
 | Actions billing | Standard GitHub-hosted runners are free in public repos. Private repos draw on a monthly included compute amount: GitHub Free **$12**, Pro **$18** (at $0.006/min for standard Linux, roughly 2,000 and 3,000 minutes). | `github/docs` `content/billing/concepts/product-billing/github-actions.md`, `data/reusables/billing/actions-included-quotas.md` |
 
-### Decision for the owner: branch protection and visibility
+### Decision: private repo on GitHub Free, CI advisory
 
-The repo is public on a personal Free account, so branch protection (or a
-ruleset) is available **today**. If it goes private on Free, protection is
-not available. Options:
+**Decided by the owner on 2026-11-16: option C.** The repo goes private and
+stays on GitHub Free. Branch protection and rulesets are not available for
+private repos on Free (see Verified facts), so the `ci` check is advisory:
+GitHub shows it on every PR but does not block merging a red one. The owner
+changes visibility; no session does.
+
+Options that were considered:
 
 | Option | Branch protection | Actions minutes | Notes |
 | --- | --- | --- | --- |
@@ -133,10 +141,20 @@ not available. Options:
 | B. Go private and upgrade to GitHub Pro | Yes | ~3,000 Linux min/month included | Paid plan; price not verified here, check GitHub's plans page. |
 | C. Go private on Free, CI advisory | **No** (red PRs can be merged; discipline only) | ~2,000 Linux min/month | The `main cannot be merged into while the ci check is red` criterion is dropped. |
 
-Recommendation: A for now (protection and minutes are free), revisit before
-any private data or secrets would make visibility matter. Secrets never live
-in the repo anyway (rule 8). The build session proceeds the same way under
-any option; only the last acceptance criterion depends on it.
+What C means in practice:
+
+- **Merge rule (replaces enforcement):** a PR is squash-merged only when `ci`
+  is green on its head commit and the branch is up to date with `main` (use
+  **Update branch** and wait for the new run if it's behind). Sessions never
+  merge, or propose merging, a red or pending PR. Follow-up below adds this to
+  `CLAUDE.md`'s Definition of done.
+- **Minutes budget:** about $12/month of included compute, roughly 2,000
+  standard Linux minutes. The run time is not yet measured; the build session
+  records the first green run's duration in the PR so the monthly headroom is
+  known. Superseded PR runs are cancelled, which matters more now.
+- **Revisit** if a collaborator joins or a red merge ever slips through:
+  option B (Pro) turns on enforcement with no workflow change; the Human
+  steps then add the ruleset.
 
 ## Acceptance criteria (test names)
 
@@ -169,21 +187,29 @@ Workflow runs:
   PR branch less than a minute apart; the first run shows "Cancelled"
 - `ci runs on push to main`: after merge, a run of `CI` appears for the
   merge commit on `main` and passes (checked by the fix/merge session)
-- `main cannot be merged into while the ci check is red`: only under option A
-  or B, after the owner completes the Human steps; with the lint canary
-  pushed, the PR's merge box shows merging is blocked by the required `ci`
-  check. Under option C this criterion is dropped and the spec says so.
+- `a red ci run shows as a failed check on the pull request`: with the lint
+  canary pushed, the PR's checks list and merge box show `CI / ci` as failed.
+  This replaces the ticket's `main cannot be merged into while the ci check is
+  red`, which is **dropped**: the owner chose a private repo on GitHub Free,
+  where branch protection and rulesets can't be enforced, so no merge block
+  exists to observe. It comes back if the plan changes to Pro (option B).
 
 ## Human steps (owner)
 
-Do these after the F01 PR's first CI run, so the `ci` check exists and shows
-up in the picker. Repository → **Settings**:
+Repository → **Settings**. Any time, before or after the F01 PR:
 
-1. **General → Pull Requests:** tick **Allow squash merging** only; untick
+1. **General → Danger Zone → Change repository visibility → Make private.**
+   From then on Actions runs draw on the Free plan's included compute.
+2. **General → Pull Requests:** tick **Allow squash merging** only; untick
    **Allow merge commits** and **Allow rebase merging**. Optionally tick
-   **Automatically delete head branches**.
-2. **Rules → Rulesets → New ruleset → New branch ruleset** (or the classic
-   **Branches → Add branch protection rule**; either works):
+   **Automatically delete head branches**, and **Always suggest updating pull
+   request branches** (helps the up-to-date part of the merge rule). These are
+   repository settings, not branch protection.
+
+**Not now (only if you move to Pro later):** after a CI run exists so `ci`
+shows in the picker,
+**Rules → Rulesets → New ruleset → New branch ruleset** (or the classic
+**Branches → Add branch protection rule**; either works):
    - Name `main`, Enforcement status **Active**
    - Target branches: **Include default branch**
    - Tick **Require a pull request before merging** (0 required approvals is
@@ -194,10 +220,8 @@ up in the picker. Repository → **Settings**:
    - Tick **Block force pushes**; keep **Restrict deletions** ticked
    - Leave the bypass list empty (or add yourself if you want an emergency
      override; that also lets you merge a red PR, so prefer empty)
-3. Tell the build/fix session it's done so it can run the last criterion.
-
-Don't change visibility until you've chosen an option above; going private on
-Free silently stops enforcement.
+   Then rename the replaced acceptance criterion back to `main cannot be
+   merged into while the ci check is red` and prove it.
 
 ## Steps for the build session
 
@@ -212,8 +236,9 @@ Free silently stops enforcement.
 5. Confirm the first run is green. If it isn't, see the first-run risk below.
 6. Run each throwaway check in turn (unit, lint, e2e), reverting each before
    the next; then the double-push cancel check.
-7. Ask the owner to do the Human steps; when done, run the merge-blocked check
-   with the lint canary, then revert it.
+7. Confirm with the owner that steps 1–2 of the Human steps are done (the
+   squash-only setting decides how the PR is merged). Note the first green
+   run's duration in the PR description.
 8. Record each criterion's run URL in the PR description. Update this spec's
    status and Follow-ups.
 
@@ -227,7 +252,9 @@ Free silently stops enforcement.
 | Actions minutes on a private Free repo (~2,000 Linux min/month) | One job, pnpm store cache, Chromium only, cancel superseded PR runs, 20-minute timeout. Each e2e webServer runs its own build, so the app is built twice more after the explicit build steps; acceptable now (see Follow-ups). |
 | Pinned SHAs go stale with no update bot | Follow-up: add an update bot later (out of scope here). |
 | `pnpm/action-setup` support ends at pnpm 12 | Fine for `pnpm@12.18.0`. On a pnpm 13 bump, move to `pnpm/setup`. |
-| Renaming the `ci` job silently breaks the required check | Scope 1 says the name is fixed; later jobs get added to the required list by the owner. |
+| **CI is advisory: a red PR can be merged** (private repo on Free) | Merge rule in Decision; added to `CLAUDE.md` via Follow-up; sessions never merge red or pending PRs. |
+| Minutes run out mid-month on the private repo | One job, store cache, cancel superseded PR runs, 20-minute timeout; first run's duration recorded; if headroom is thin, the duplicate-builds follow-up is the first saving. |
+| Renaming the `ci` job | Scope 1 keeps the name fixed so the merge rule (and any future ruleset) keeps pointing at it. |
 
 ## Follow-ups
 
@@ -242,8 +269,13 @@ Free silently stops enforcement.
   `webServer` commands. Later: let the webServer skip the build when CI has
   already built (e.g. a `CI`-gated command), saving a few minutes per run.
 - **More jobs later (F02, F03).** F02 can add the Postgres `services:` block
-  to the same `ci` job, which keeps one required check. If a separate job is
-  added, the owner adds it to the ruleset's required checks.
+  to the same `ci` job, which keeps one check to look at. A separate job
+  would also have to be green under the merge rule.
+- **`CLAUDE.md` merge rule.** Add to the Definition of done: "`ci` is green
+  on the PR's head commit and the branch is up to date with `main`", and note
+  in the Session loop that CI is advisory (private repo on Free), so the
+  fix/merge session checks this by hand. Belongs in the F01 fix/merge session
+  ("update this file if a convention changed"), not the build PR.
 - **Action update bot** (Dependabot or Renovate) for the pinned SHAs.
 - **Cloud sessions can't read `docs.github.com`, `playwright.dev`, `pnpm.io`**,
   or download Playwright browsers. Consider allowing those hosts in the
