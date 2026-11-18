@@ -9,7 +9,12 @@ export default defineConfig({
 	testMatch: "spa.spec.ts",
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	reporter: process.env.CI ? "github" : "list",
+	reporter: process.env.CI
+		? [
+				["github"],
+				["html", { open: "never", outputFolder: "playwright-report-spa" }],
+			]
+		: "list",
 	use: {
 		baseURL: `http://localhost:${PORT}`,
 		trace: "on-first-retry",

@@ -38,3 +38,20 @@ pnpm dev                               # http://localhost:3000
 | `pnpm e2e:spa` | Playwright against the SPA build on a static server |
 
 Before every commit: `pnpm typecheck && pnpm lint && pnpm test`.
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the same commands as the
+table above on every pull request and on every push to `main`: install,
+typecheck, lint, unit tests, both builds, then `pnpm e2e` and `pnpm e2e:spa`.
+
+- The check is called `ci`. It is **advisory**: this plan can't enforce it,
+  so **never merge a PR unless `ci` is green on its latest commit and the
+  branch is up to date with `main`**.
+- When an e2e step fails, the run uploads a `playwright-report` artifact.
+  Download it from the run's Summary page, unzip it and open `index.html`
+  (`playwright-report/` for `pnpm e2e`, `playwright-report-spa/` for
+  `pnpm e2e:spa`).
+- Installs use `--frozen-lockfile`. pnpm 12 refuses versions published less
+  than 24 hours ago (`minimumReleaseAge`, default 1440 minutes), so a lockfile
+  bump to a brand-new release fails until that release is a day old.
