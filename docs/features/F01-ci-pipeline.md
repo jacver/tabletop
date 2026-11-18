@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F01-ci-pipeline`
 - **Sessions:** `[F01] ci-pipeline · plan`, `· build`, `· review`
-- **Status:** Built 2026-11-16, in review (PR #2)
+- **Status:** Done, merged via PR #2
 
 ## Goal
 
@@ -263,19 +263,23 @@ shows in the picker,
   pinned browser; changing the Playwright version in the same branch would
   make any failure ambiguous. Do it in a small `chore/` branch after F01 is
   merged, so CI checks the bump.
-- **F00 spec status line** still says "Built, in review"; set it to "Merged"
-  in the next branch that touches `docs/`.
+- **Done:** ~~F00 spec status line still says "Built, in review"; set it to
+  "Merged" in the next branch that touches `docs/`.~~ Set to "Merged" in the
+  F01 docs follow-up PR.
 - **Duplicate builds in CI.** `pnpm e2e` and `pnpm e2e:spa` rebuild via their
   `webServer` commands. Later: let the webServer skip the build when CI has
   already built (e.g. a `CI`-gated command), saving a few minutes per run.
 - **More jobs later (F02, F03).** F02 can add the Postgres `services:` block
   to the same `ci` job, which keeps one check to look at. A separate job
   would also have to be green under the merge rule.
-- **`CLAUDE.md` merge rule.** Add to the Definition of done: "`ci` is green
-  on the PR's head commit and the branch is up to date with `main`", and note
-  in the Session loop that CI is advisory (private repo on Free), so the
-  fix/merge session checks this by hand. Belongs in the F01 fix/merge session
-  ("update this file if a convention changed"), not the build PR.
+- **Done:** ~~`CLAUDE.md` merge rule.~~ Added to the Definition of done and
+  the Session loop in the F01 docs follow-up PR.
+- **PR #2 landed as a merge commit** (`92b947a`), not a squash, because
+  squash-only wasn't yet enforced in the repository settings; the canary
+  commits and their reverts are therefore in `main`'s history. Squash is now
+  the only merge method. The `CI` run on the merge commit passed
+  (https://github.com/jacver/tabletop/actions/runs/44421362718), meeting
+  `ci runs on push to main`.
 - **Action update bot** (Dependabot or Renovate) for the pinned SHAs.
 - **Cloud sessions can't read `docs.github.com`, `playwright.dev`, `pnpm.io`**,
   or download Playwright browsers. Consider allowing those hosts in the
