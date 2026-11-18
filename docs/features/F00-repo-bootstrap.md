@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F00-repo-bootstrap`
 - **Sessions:** `[F00] repo-bootstrap · build`, `· review`
-- **Status:** Built, in review
+- **Status:** Merged
 
 ## Goal
 

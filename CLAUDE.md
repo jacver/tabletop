@@ -111,6 +111,9 @@ the spec's **Follow-ups** list, not in the PR.
 3. **Review**: fresh session reads the spec and the diff, not the build chat.
    Look for authz holes, missing tests, spec drift.
 4. **Fix-N**: address review, merge, update this file if a convention changed.
+   CI is advisory (private repo on GitHub Free, so GitHub can't block a red
+   merge): before merging, this session checks by hand that `ci` is green on
+   the head commit and the branch is up to date with `main`.
 
 ## Definition of done
 
@@ -123,4 +126,5 @@ the spec's **Follow-ups** list, not in the PR.
 - [ ] One Playwright happy-path test for the feature
 - [ ] Keyboard navigation and labels checked on new UI
 - [ ] Deployed to staging and smoke-tested (from F03 on)
+- [ ] `ci` is green on the PR's head commit and the branch is up to date with `main`
 - [ ] Spec Follow-ups updated; this file updated if conventions changed
