@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F02-database`
 - **Sessions:** `[F02] database · plan`, `· build`, `· review`
-- **Status:** Approved 2026-11-19, in build
+- **Status:** Built and merged 2026-11-19 ([PR #4](https://github.com/jacver/tabletop/pull/4), squash `5d90ecd`). Drift canary not yet run (see Follow-ups).
 
 Items marked **Assumed** are defaults chosen by the plan session for the owner
 to confirm or change. Items marked **Verify** were checked against current
@@ -438,6 +438,33 @@ query test stands in for the pattern), **Playwright happy path** and
 | Docker Hub pull rate limits on CI | GitHub-hosted runners rarely hit them for one small image. If they do, switch to the `public.ecr.aws/docker/library/postgres` mirror in a `fix/` branch. |
 
 ## Follow-ups
+
+- **Build results (2026-11-19):** first green `ci` run
+  [44426343193](https://github.com/jacver/tabletop/actions/runs/44426343193),
+  job **1 min 9 s** (was ~1.5 min before F02; about 2 s added for the
+  migration steps and integration tests, plus ~12 s for the service container
+  to start, which overlapped other work). Migration checks, `db:migrate`,
+  `db:seed` and the integration project ran against Postgres 18.7 on Node 26.
+  drizzle-kit 0.31.11 worked on Node 26 unchanged.
+- **Drift canary still to run:** the owner merged PR #4 at its green head
+  seconds after the canary commit was pushed, so no run covered it (CI only
+  runs on `pull_request` and pushes to `main`). The canary was reverted on the
+  branch with a follow-up commit. To close
+  `ci fails when the schema changes without a migration`: on the next PR that
+  touches `src/db/schema/` (or a throwaway PR), push a column added without
+  `pnpm db:generate`, see `migrations match schema` fail, revert. The step was
+  checked locally only (`db:generate` with no change writes nothing, and the
+  test passes).
+- **Build deviation, empty `DATABASE_URL`:** `.env.example` ships
+  `DATABASE_URL=` (empty), which failed Zod's URL check with a raw error. The
+  schema now treats `""` as unset, so `requireDatabaseUrl` shows its message.
+  Covered by an extra assertion in the existing `requireDatabaseUrl…` test.
+- **Build deviation, Biome ignores `src/db/migrations`:** drizzle-kit writes
+  `meta/*.json` with 2-space indent, which fails Biome's formatter, and
+  generated files must stay untouched.
+- **Verified in build:** Biome 2.6.7 rule is `correctness/noNodejsModules`;
+  `overrides[].includes` + `linter.rules` is the override syntax. A probe
+  importing `node:fs` under `src/lib/` fails lint.
 
 - **F01 follow-up picked up:** "F02 can add the Postgres `services:` block to
   the same `ci` job, which keeps one check to look at." Done in Scope 7.
