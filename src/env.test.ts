@@ -26,6 +26,10 @@ describe("env", () => {
 		expect(() => requireDatabaseUrl(parseEnv({}))).toThrow(
 			/DATABASE_URL is not set\. Start Postgres with `pnpm db:up`/,
 		);
+		// `DATABASE_URL=` copied from .env.example without a value.
+		expect(() => requireDatabaseUrl(parseEnv({ DATABASE_URL: "" }))).toThrow(
+			/DATABASE_URL is not set/,
+		);
 		const url = "postgres://tabletop:tabletop@localhost:5432/tabletop";
 		expect(requireDatabaseUrl(parseEnv({ DATABASE_URL: url }))).toBe(url);
 	});
