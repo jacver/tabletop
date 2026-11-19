@@ -17,7 +17,6 @@ export const gameSystems = pgTable(
 		id: uuid().primaryKey().defaultRandom(),
 		ownerId: text().notNull(),
 		name: text().notNull(),
-		canaryNote: text(),
 		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp({ withTimezone: true })
 			.notNull()
