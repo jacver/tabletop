@@ -29,9 +29,29 @@ export default defineConfig(({ mode }) => {
 		],
 		build: isSpa ? { outDir: "dist-spa" } : undefined,
 		test: {
-			environment: "jsdom",
-			include: ["src/**/*.test.{ts,tsx}"],
-			setupFiles: ["./src/test/setup.ts"],
+			// `pnpm test` runs both projects; `--project unit` needs no database.
+			// A test that touches Postgres is named `*.int.test.ts`.
+			projects: [
+				{
+					extends: true,
+					test: {
+						name: "unit",
+						environment: "jsdom",
+						include: ["src/**/*.test.{ts,tsx}"],
+						exclude: ["src/**/*.int.test.ts"],
+						setupFiles: ["./src/test/setup.ts"],
+					},
+				},
+				{
+					extends: true,
+					test: {
+						name: "integration",
+						environment: "node",
+						include: ["src/**/*.int.test.ts"],
+						globalSetup: ["./src/test/db-global-setup.ts"],
+					},
+				},
+			],
 		},
 	};
 });

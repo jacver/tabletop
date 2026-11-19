@@ -47,7 +47,9 @@ names (e.g. "Ironvale Skirmish", "Brass Wardens") in examples and tests.
 | `pnpm lint` / `pnpm lint:fix` / `pnpm format` | Biome check / Biome check --write (incl. import order) / Biome format --write |
 | `pnpm test` | Vitest (unit + integration) |
 | `pnpm e2e` | Playwright |
-| `pnpm db:up` / `pnpm db:migrate` / `pnpm db:seed` | Local Postgres (from F02) |
+| `pnpm test:unit` / `pnpm test:int` | Vitest unit project only (no database) / integration project only |
+| `pnpm db:up` / `pnpm db:down` | Start / stop local Postgres (Docker Compose) |
+| `pnpm db:generate` / `pnpm db:migrate` / `pnpm db:seed` | Generate a migration from `src/db/schema/` / apply migrations / seed sample data |
 
 Run `pnpm typecheck && pnpm lint && pnpm test` before every commit.
 
