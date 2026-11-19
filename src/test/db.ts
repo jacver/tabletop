@@ -82,7 +82,10 @@ export async function withDatabase<T>(
 /** The entries of drizzle-kit's migration journal (one per migration). */
 export function readMigrationJournal(): { tag: string }[] {
 	const journal: { entries: { tag: string }[] } = JSON.parse(
-		readFileSync(`${migrationsConfig.migrationsFolder}/meta/_journal.json`, "utf8"),
+		readFileSync(
+			`${migrationsConfig.migrationsFolder}/meta/_journal.json`,
+			"utf8",
+		),
 	);
 	return journal.entries;
 }
