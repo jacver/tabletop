@@ -19,6 +19,23 @@ jobs:
     name: ci
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # Same throwaway credentials and image as compose.yaml; not secrets.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: tabletop
+          POSTGRES_PASSWORD: tabletop
+          POSTGRES_DB: tabletop
+        options: >-
+          --health-cmd "pg_isready -U tabletop -d tabletop"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgres://tabletop:tabletop@localhost:5432/tabletop
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,6 +53,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
+      - run: pnpm db:generate
+
+      # Fails when schema/ changed without `pnpm db:generate`, or a generated
+      # migration was edited by hand.
+      - name: migrations match schema
+        run: |
+          if [ -n "$(git status --porcelain -- src/db/migrations)" ]; then
+            echo "::error::src/db/migrations is out of date with src/db/schema. Run 'pnpm db:generate --name <slug>' and commit the result; never edit a generated migration."
+            git status -- src/db/migrations
+            git diff -- src/db/migrations
+            exit 1
+          fi
+
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
       - run: pnpm test
       - run: pnpm build
       - run: pnpm build:spa
