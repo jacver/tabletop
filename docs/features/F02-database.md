@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F02-database`
 - **Sessions:** `[F02] database · plan`, `· build`, `· review`
-- **Status:** Planned, awaiting approval
+- **Status:** Approved 2026-11-19, in build
 
 Items marked **Assumed** are defaults chosen by the plan session for the owner
 to confirm or change. Items marked **Verify** were checked against current
