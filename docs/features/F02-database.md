@@ -2,7 +2,7 @@
 
 - **Branch:** `chore/F02-database`
 - **Sessions:** `[F02] database · plan`, `· build`, `· review`
-- **Status:** Built and merged 2026-11-19 ([PR #4](https://github.com/jacver/tabletop/pull/4), squash `5d90ecd`). Drift canary not yet run (see Follow-ups).
+- **Status:** Built and merged 2026-11-19 ([PR #4](https://github.com/jacver/tabletop/pull/4), squash `5d90ecd`). Drift canary run in [PR #5](https://github.com/jacver/tabletop/pull/5).
 
 Items marked **Assumed** are defaults chosen by the plan session for the owner
 to confirm or change. Items marked **Verify** were checked against current
