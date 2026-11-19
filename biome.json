@@ -13,6 +13,7 @@
 			"!**/src/components/ui",
 			"!**/src/styles.css",
 			"!**/pnpm-lock.yaml",
+			"!**/src/db/migrations",
 			"!**/*.md"
 		]
 	},
@@ -24,9 +25,24 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
+			"preset": "recommended",
+			"correctness": {
+				"noNodejsModules": "error"
+			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["*.config.ts", "src/db/cli/**", "src/test/**", "tests/**"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noNodejsModules": "off"
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
