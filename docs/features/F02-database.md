@@ -446,15 +446,14 @@ query test stands in for the pattern), **Playwright happy path** and
   to start, which overlapped other work). Migration checks, `db:migrate`,
   `db:seed` and the integration project ran against Postgres 18.7 on Node 26.
   drizzle-kit 0.31.11 worked on Node 26 unchanged.
-- **Drift canary still to run:** the owner merged PR #4 at its green head
-  seconds after the canary commit was pushed, so no run covered it (CI only
-  runs on `pull_request` and pushes to `main`). The canary was reverted on the
-  branch with a follow-up commit. To close
-  `ci fails when the schema changes without a migration`: on the next PR that
-  touches `src/db/schema/` (or a throwaway PR), push a column added without
-  `pnpm db:generate`, see `migrations match schema` fail, revert. The step was
-  checked locally only (`db:generate` with no change writes nothing, and the
-  test passes).
+- **Drift canary (run in PR #5):** PR #4 was merged at its green head
+  seconds after its canary commit was pushed, so the check ran on the
+  follow-up PR #5 instead. Canary `71b0c8a` added a column to
+  `game-systems.ts` without `pnpm db:generate`;
+  [run 44427048192](https://github.com/jacver/tabletop/actions/runs/44427048192)
+  failed at `migrations match schema` with the error annotation, `git status`
+  (new `0001_*.sql` and snapshot) and the `_journal.json` diff in the log,
+  and every later step was skipped. Reverted in `cdee15c` (no force-push).
 - **Build deviation, empty `DATABASE_URL`:** `.env.example` ships
   `DATABASE_URL=` (empty), which failed Zod's URL check with a raw error. The
   schema now treats `""` as unset, so `requireDatabaseUrl` shows its message.
